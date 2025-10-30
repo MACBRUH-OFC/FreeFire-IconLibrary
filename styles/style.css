@@ -732,16 +732,6 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Rarity Background Images */
-.rarity-Blue .item-background { background-image: url(''); }
-.rarity-Green .item-background { background-image: url(''); }
-.rarity-Orange .item-background { background-image: url(''); }
-.rarity-Orange_Plus .item-background { background-image: url(''); }
-.rarity-Purple .item-background { background-image: url(''); }
-.rarity-Purple_Plus .item-background { background-image: url(''); }
-.rarity-Red .item-background { background-image: url(''); }
-.rarity-White .item-background { background-image: url(''); }
-
 /* Image Not Available */
 .image-not-available {
     display: flex;
