@@ -39,8 +39,31 @@ const statusMessages = [
     "Library ready"
 ];
 
+// Test the API endpoints on load
+async function testEndpoints() {
+    try {
+        console.log('Testing API endpoints...');
+        
+        // Test data endpoint
+        const dataTest = await fetch(CONFIG.API_ENDPOINTS.DATA_SOURCE);
+        console.log('Data endpoint status:', dataTest.status);
+        
+        // Test image endpoint
+        const imageTest = await fetch(`${CONFIG.API_ENDPOINTS.IMAGE_PROXY}?type=rarity&value=Blue`);
+        console.log('Image endpoint status:', imageTest.status);
+        
+    } catch (error) {
+        console.error('API endpoint test failed:', error);
+    }
+}
+
 // Initialize the app
 function initApp() {
+    console.log('Initializing Free Fire Item Library...');
+    
+    // Test endpoints first
+    testEndpoints();
+    
     // Set up assets through protected endpoints
     setupAssets();
     
@@ -156,22 +179,30 @@ function hideLoadingScreen() {
     }, 800);
 }
 
-// Fetch data from protected Node.js endpoint
+// Enhanced fetchData with better error handling
 function fetchData() {
+    console.log('Starting data fetch from:', CONFIG.API_ENDPOINTS.DATA_SOURCE);
+    
     fetch(CONFIG.API_ENDPOINTS.DATA_SOURCE)
     .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        console.log('Response status:', res.status);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status} - ${res.statusText}`);
+        }
         return res.json();
     })
     .then(response => {
-        // Handle the response format from API
+        console.log('API Response:', response);
+        
         if (response.status === 'error') {
             throw new Error(response.error);
         }
         
         if (!Array.isArray(response.data)) {
-            throw new Error('Invalid data format received');
+            throw new Error('Invalid data format received - expected array');
         }
+        
+        console.log(`Successfully loaded ${response.data.length} items`);
         
         allItems = response.data;
         filteredItems = [...allItems];
@@ -184,6 +215,209 @@ function fetchData() {
         hideLoadingScreen();
         showError('Failed to load items', err.message, true);
     });
+}
+
+// ERROR HANDLING FUNCTION
+function showError(title, message, showRetry = false) {
+    const itemGrid = document.getElementById('itemGrid');
+    itemGrid.innerHTML = `
+        <div class="error-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>${title}</h3>
+            <p>${message}</p>
+            ${showRetry ? '<button class="retry-btn" onclick="fetchData()"><i class="fas fa-redo"></i> Try Again</button>' : ''}
+        </div>
+    `;
+}
+
+// Set up event listeners
+function setupEventListeners() {
+    const searchInput = document.getElementById('searchInput');
+    const popupBg = document.getElementById('popupBg');
+    const closePopupBtn = document.getElementById('closePopupBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    searchInput.addEventListener('input', debounce(applyFilters, 300));
+    
+    popupBg.addEventListener('click', function(e) {
+        if (e.target === popupBg) {
+            closePopup();
+        }
+    });
+    
+    closePopupBtn.addEventListener('click', closePopup);
+    
+    prevBtn.addEventListener('click', enhancedPrevPage);
+    nextBtn.addEventListener('click', enhancedNextPage);
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closePopup();
+        if (e.key === 'ArrowRight' && currentPage < totalPages) enhancedNextPage();
+        if (e.key === 'ArrowLeft' && currentPage > 1) enhancedPrevPage();
+    });
+}
+
+// Initialize custom dropdowns
+function initializeCustomSelects() {
+    document.querySelectorAll('.custom-select').forEach(select => {
+        const selected = select.querySelector('.select-selected');
+        const items = select.querySelector('.select-items');
+        
+        selected.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            // Close all other selects
+            document.querySelectorAll('.custom-select').forEach(otherSelect => {
+                if (otherSelect !== select) {
+                    otherSelect.querySelector('.select-selected').classList.remove('select-arrow-active');
+                    otherSelect.querySelector('.select-items').classList.remove('active');
+                }
+            });
+            
+            // Toggle current select
+            this.classList.toggle('select-arrow-active');
+            items.classList.toggle('active');
+        });
+        
+        items.querySelectorAll('div').forEach(option => {
+            option.addEventListener('click', function() {
+                const select = this.closest('.custom-select');
+                const selected = select.querySelector('.select-selected');
+                selected.textContent = this.textContent;
+                selected.classList.remove('select-arrow-active');
+                items.classList.remove('active');
+                
+                if (select.id === 'raritySelect') {
+                    currentRarityFilter = this.textContent === 'All Rarities' ? 'all' : 
+                        this.textContent === 'Orange Plus' ? 'Orange_Plus' :
+                        this.textContent === 'Purple Plus' ? 'Purple_Plus' : this.textContent;
+                    applyFilters();
+                } else if (select.id === 'typeSelect') {
+                    currentTypeFilter = this.textContent === 'All Types' ? 'all' : this.textContent;
+                    applyFilters();
+                } else if (select.id === 'collectionTypeSelect') {
+                    currentCollectionFilter = this.textContent === 'All Collections' ? 'all' : this.textContent;
+                    applyFilters();
+                } else if (select.id === 'sortSelect') {
+                    currentSort = this.textContent.toLowerCase();
+                    applyFilters();
+                }
+            });
+        });
+    });
+    
+    // Close all selects when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.custom-select')) {
+            closeAllSelects();
+        }
+    });
+}
+
+function closeAllSelects() {
+    document.querySelectorAll('.select-selected').forEach(selected => {
+        selected.classList.remove('select-arrow-active');
+    });
+    document.querySelectorAll('.select-items').forEach(items => {
+        items.classList.remove('active');
+    });
+}
+
+// Debounce function for search
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Apply filters and sorting
+function applyFilters() {
+    const searchInput = document.getElementById('searchInput');
+    const searchQuery = searchInput.value.toLowerCase();
+
+    filteredItems = allItems.filter(item => {
+        const matchesSearch = 
+            (item.name_text && item.name_text.toLowerCase().includes(searchQuery)) ||
+            (item.icon && item.icon.toLowerCase().includes(searchQuery)) ||
+            (item.id && item.id.toString().includes(searchQuery));
+        
+        const matchesRarity = currentRarityFilter === 'all' || item.rare === currentRarityFilter;
+        const matchesType = currentTypeFilter === 'all' || item.type === currentTypeFilter;
+        
+        let matchesCollectionType = true;
+        if (currentCollectionFilter !== 'all') {
+            if (item.type === 'COLLECTION') {
+                matchesCollectionType = item.collection_type === currentCollectionFilter;
+            } else {
+                matchesCollectionType = false;
+            }
+        }
+        
+        return matchesSearch && matchesRarity && matchesType && matchesCollectionType;
+    });
+
+    // Sort items
+    if (currentSort === 'name') {
+        filteredItems.sort((a, b) => (a.name_text || '').localeCompare(b.name_text || ''));
+    } else if (currentSort === 'id') {
+        filteredItems.sort((a, b) => (a.id || 0) - (b.id || 0));
+    } else if (currentSort === 'rarity') {
+        const rarityOrder = { 
+            'Orange_Plus': 1, 
+            'Orange': 2, 
+            'Purple_Plus': 3, 
+            'Purple': 4, 
+            'Red': 5, 
+            'Blue': 6, 
+            'Green': 7, 
+            'White': 8 
+        };
+        filteredItems.sort((a, b) => {
+            const aRarity = rarityOrder[a.rare] || 9;
+            const bRarity = rarityOrder[b.rare] || 9;
+            return aRarity - bRarity;
+        });
+    }
+
+    currentPage = 1;
+    updateStats();
+    loadPage(currentPage);
+}
+
+// Load items for the current page
+function loadPage(page) {
+    const itemGrid = document.getElementById('itemGrid');
+    itemGrid.innerHTML = '';
+    const start = (page - 1) * CONFIG.APP.ITEMS_PER_PAGE;
+    const end = page * CONFIG.APP.ITEMS_PER_PAGE;
+    const itemsToShow = filteredItems.slice(start, end);
+
+    if (itemsToShow.length === 0) {
+        itemGrid.innerHTML = `
+            <div class="error-message" style="grid-column: 1 / -1;">
+                <i class="fas fa-search"></i>
+                <h3>No items found</h3>
+                <p>Try adjusting your search or filters</p>
+            </div>
+        `;
+        updatePagination();
+        updateCurrentPageDisplay();
+        return;
+    }
+
+    itemsToShow.forEach(item => {
+        createItemElement(item);
+    });
+
+    updatePagination();
+    updateCurrentPageDisplay();
 }
 
 // Create item element with protected image endpoints
@@ -330,87 +564,21 @@ function updateStats() {
     updateCurrentPageDisplay();
 }
 
-// Apply filters and sorting
-function applyFilters() {
-    const searchInput = document.getElementById('searchInput');
-    const searchQuery = searchInput.value.toLowerCase();
-
-    filteredItems = allItems.filter(item => {
-        const matchesSearch = 
-            (item.name_text && item.name_text.toLowerCase().includes(searchQuery)) ||
-            (item.icon && item.icon.toLowerCase().includes(searchQuery)) ||
-            (item.id && item.id.toString().includes(searchQuery));
+// Set up scroll behavior for header
+function setupScrollBehavior() {
+    const mainHeader = document.getElementById('mainHeader');
+    
+    window.addEventListener('scroll', function() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         
-        const matchesRarity = currentRarityFilter === 'all' || item.rare === currentRarityFilter;
-        const matchesType = currentTypeFilter === 'all' || item.type === currentTypeFilter;
-        
-        let matchesCollectionType = true;
-        if (currentCollectionFilter !== 'all') {
-            if (item.type === 'COLLECTION') {
-                matchesCollectionType = item.collection_type === currentCollectionFilter;
-            } else {
-                matchesCollectionType = false;
-            }
+        if (scrollTop > lastScrollTop && scrollTop > 100) {
+            mainHeader.classList.add('hidden');
+        } else {
+            mainHeader.classList.remove('hidden');
         }
         
-        return matchesSearch && matchesRarity && matchesType && matchesCollectionType;
-    });
-
-    // Sort items
-    if (currentSort === 'name') {
-        filteredItems.sort((a, b) => (a.name_text || '').localeCompare(b.name_text || ''));
-    } else if (currentSort === 'id') {
-        filteredItems.sort((a, b) => (a.id || 0) - (b.id || 0));
-    } else if (currentSort === 'rarity') {
-        const rarityOrder = { 
-            'Orange_Plus': 1, 
-            'Orange': 2, 
-            'Purple_Plus': 3, 
-            'Purple': 4, 
-            'Red': 5, 
-            'Blue': 6, 
-            'Green': 7, 
-            'White': 8 
-        };
-        filteredItems.sort((a, b) => {
-            const aRarity = rarityOrder[a.rare] || 9;
-            const bRarity = rarityOrder[b.rare] || 9;
-            return aRarity - bRarity;
-        });
-    }
-
-    currentPage = 1;
-    updateStats();
-    loadPage(currentPage);
-}
-
-// Load items for the current page
-function loadPage(page) {
-    const itemGrid = document.getElementById('itemGrid');
-    itemGrid.innerHTML = '';
-    const start = (page - 1) * CONFIG.APP.ITEMS_PER_PAGE;
-    const end = page * CONFIG.APP.ITEMS_PER_PAGE;
-    const itemsToShow = filteredItems.slice(start, end);
-
-    if (itemsToShow.length === 0) {
-        itemGrid.innerHTML = `
-            <div class="error-message" style="grid-column: 1 / -1;">
-                <i class="fas fa-search"></i>
-                <h3>No items found</h3>
-                <p>Try adjusting your search or filters</p>
-            </div>
-        `;
-        updatePagination();
-        updateCurrentPageDisplay();
-        return;
-    }
-
-    itemsToShow.forEach(item => {
-        createItemElement(item);
-    });
-
-    updatePagination();
-    updateCurrentPageDisplay();
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    }, { passive: true });
 }
 
 // Popup functions using protected endpoints
@@ -495,19 +663,6 @@ function closePopup() {
     popupBg.style.display = "none";
     document.body.style.overflow = "auto";
     dataUpdateNote.style.display = 'none';
-}
-
-// ERROR HANDLING FUNCTION
-function showError(title, message, showRetry = false) {
-    const itemGrid = document.getElementById('itemGrid');
-    itemGrid.innerHTML = `
-        <div class="error-message">
-            <i class="fas fa-exclamation-triangle"></i>
-            <h3>${title}</h3>
-            <p>${message}</p>
-            ${showRetry ? '<button class="retry-btn" onclick="fetchData()"><i class="fas fa-redo"></i> Try Again</button>' : ''}
-        </div>
-    `;
 }
 
 // Initialize the app when DOM is loaded
