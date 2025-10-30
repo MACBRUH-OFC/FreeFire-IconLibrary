@@ -1,23 +1,43 @@
 {
   "version": 2,
+  "name": "freefire-item-library",
   "builds": [
     {
-      "src": "api/items.py",
-      "use": "@vercel/python"
+      "src": "api/get-data.php",
+      "use": "@vercel/php"
     },
     {
-      "src": "public/**/*",
+      "src": "**/*.html",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/items.py"
+      "dest": "/api/get-data.php"
     },
     {
       "src": "/(.*)",
-      "dest": "/public/$1"
+      "dest": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
     }
   ]
 }
