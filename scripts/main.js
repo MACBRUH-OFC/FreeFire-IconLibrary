@@ -56,7 +56,14 @@ function initApp() {
 
 // Set up dynamic assets through protected endpoints
 function setupAssets() {
-    // These will be set via CSS through protected endpoints
+    // Set loading and header logos through protected endpoint
+    const loadingLogo = document.getElementById('loadingLogo');
+    const headerLogo = document.getElementById('headerLogo');
+    
+    // Use protected endpoint for logos
+    if (loadingLogo) loadingLogo.src = `${CONFIG.API_ENDPOINTS.IMAGE_PROXY}?type=icon&value=logo`;
+    if (headerLogo) headerLogo.src = `${CONFIG.API_ENDPOINTS.IMAGE_PROXY}?type=icon&value=logo`;
+    
     setupRarityBackgrounds();
 }
 
@@ -65,6 +72,7 @@ function setupRarityBackgrounds() {
     rarities.forEach(rarity => {
         const elements = document.querySelectorAll(`.rarity-${rarity} .item-background`);
         elements.forEach(el => {
+            // Use protected endpoint for rarity backgrounds
             el.style.backgroundImage = `url('${CONFIG.API_ENDPOINTS.IMAGE_PROXY}?type=rarity&value=${rarity}')`;
         });
     });
@@ -148,7 +156,7 @@ function hideLoadingScreen() {
     }, 800);
 }
 
-// Fetch data from protected PHP endpoint
+// Fetch data from protected Node.js endpoint
 function fetchData() {
     fetch(CONFIG.API_ENDPOINTS.DATA_SOURCE)
     .then(res => {
@@ -156,7 +164,7 @@ function fetchData() {
         return res.json();
     })
     .then(response => {
-        // Handle the response format from PHP
+        // Handle the response format from API
         if (response.status === 'error') {
             throw new Error(response.error);
         }
@@ -215,6 +223,194 @@ function createItemElement(item) {
     
     // Preload image for faster display
     preloadImage(primaryURL);
+}
+
+// Fixed image error handler
+function handleImageError(imgElement, fallbackUrl) {
+    // If already tried fallback, show not available
+    if (imgElement.dataset.fallbackTried === 'true') {
+        imgElement.style.display = 'none';
+        const fallbackDiv = imgElement.nextElementSibling;
+        if (fallbackDiv && fallbackDiv.classList.contains('image-not-available')) {
+            fallbackDiv.style.display = 'flex';
+        }
+        return;
+    }
+    
+    // Mark as tried and attempt fallback
+    imgElement.dataset.fallbackTried = 'true';
+    imgElement.src = fallbackUrl;
+    
+    // Preload fallback image
+    preloadImage(fallbackUrl);
+}
+
+// Preload images for faster loading
+function preloadImage(url) {
+    if (imageCache.has(url)) return;
+    
+    const img = new Image();
+    img.src = url;
+    imageCache.set(url, img);
+}
+
+// Update pagination controls
+function updatePagination() {
+    const pageNumberEl = document.getElementById('pageNumber');
+    const totalPagesEl = document.getElementById('totalPages');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    totalPages = Math.ceil(filteredItems.length / CONFIG.APP.ITEMS_PER_PAGE);
+    pageNumberEl.textContent = currentPage;
+    totalPagesEl.textContent = totalPages;
+    
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+}
+
+// Update current page display in stats
+function updateCurrentPageDisplay() {
+    const currentPageEl = document.getElementById('currentPage');
+    currentPageEl.textContent = currentPage;
+}
+
+// Enhanced navigation with transitions
+function enhancedNextPage() {
+    if (currentPage < totalPages) {
+        transitionToPage(() => {
+            currentPage++;
+            loadPage(currentPage);
+        });
+    }
+}
+
+function enhancedPrevPage() {
+    if (currentPage > 1) {
+        transitionToPage(() => {
+            currentPage--;
+            loadPage(currentPage);
+        });
+    }
+}
+
+// Enhanced page transition function
+function transitionToPage(pageFunction) {
+    const gridContainer = document.getElementById('gridContainer');
+    const pageTransition = document.getElementById('pageTransition');
+    
+    // Add fade-out effect to grid
+    gridContainer.classList.add('fade-out');
+    
+    // Show page transition overlay
+    pageTransition.classList.add('active');
+    
+    setTimeout(() => {
+        // Scroll instantly to top
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        
+        // Execute the page function
+        pageFunction();
+        
+        // Hide transition and show content
+        setTimeout(() => {
+            pageTransition.classList.remove('active');
+            gridContainer.classList.remove('fade-out');
+        }, 200);
+    }, 300);
+}
+
+// Update statistics
+function updateStats() {
+    const totalItemsEl = document.getElementById('totalItems');
+    const filteredItemsEl = document.getElementById('filteredItems');
+    
+    totalItemsEl.textContent = allItems.length.toLocaleString();
+    filteredItemsEl.textContent = filteredItems.length.toLocaleString();
+    updateCurrentPageDisplay();
+}
+
+// Apply filters and sorting
+function applyFilters() {
+    const searchInput = document.getElementById('searchInput');
+    const searchQuery = searchInput.value.toLowerCase();
+
+    filteredItems = allItems.filter(item => {
+        const matchesSearch = 
+            (item.name_text && item.name_text.toLowerCase().includes(searchQuery)) ||
+            (item.icon && item.icon.toLowerCase().includes(searchQuery)) ||
+            (item.id && item.id.toString().includes(searchQuery));
+        
+        const matchesRarity = currentRarityFilter === 'all' || item.rare === currentRarityFilter;
+        const matchesType = currentTypeFilter === 'all' || item.type === currentTypeFilter;
+        
+        let matchesCollectionType = true;
+        if (currentCollectionFilter !== 'all') {
+            if (item.type === 'COLLECTION') {
+                matchesCollectionType = item.collection_type === currentCollectionFilter;
+            } else {
+                matchesCollectionType = false;
+            }
+        }
+        
+        return matchesSearch && matchesRarity && matchesType && matchesCollectionType;
+    });
+
+    // Sort items
+    if (currentSort === 'name') {
+        filteredItems.sort((a, b) => (a.name_text || '').localeCompare(b.name_text || ''));
+    } else if (currentSort === 'id') {
+        filteredItems.sort((a, b) => (a.id || 0) - (b.id || 0));
+    } else if (currentSort === 'rarity') {
+        const rarityOrder = { 
+            'Orange_Plus': 1, 
+            'Orange': 2, 
+            'Purple_Plus': 3, 
+            'Purple': 4, 
+            'Red': 5, 
+            'Blue': 6, 
+            'Green': 7, 
+            'White': 8 
+        };
+        filteredItems.sort((a, b) => {
+            const aRarity = rarityOrder[a.rare] || 9;
+            const bRarity = rarityOrder[b.rare] || 9;
+            return aRarity - bRarity;
+        });
+    }
+
+    currentPage = 1;
+    updateStats();
+    loadPage(currentPage);
+}
+
+// Load items for the current page
+function loadPage(page) {
+    const itemGrid = document.getElementById('itemGrid');
+    itemGrid.innerHTML = '';
+    const start = (page - 1) * CONFIG.APP.ITEMS_PER_PAGE;
+    const end = page * CONFIG.APP.ITEMS_PER_PAGE;
+    const itemsToShow = filteredItems.slice(start, end);
+
+    if (itemsToShow.length === 0) {
+        itemGrid.innerHTML = `
+            <div class="error-message" style="grid-column: 1 / -1;">
+                <i class="fas fa-search"></i>
+                <h3>No items found</h3>
+                <p>Try adjusting your search or filters</p>
+            </div>
+        `;
+        updatePagination();
+        updateCurrentPageDisplay();
+        return;
+    }
+
+    itemsToShow.forEach(item => {
+        createItemElement(item);
+    });
+
+    updatePagination();
+    updateCurrentPageDisplay();
 }
 
 // Popup functions using protected endpoints
@@ -276,5 +472,43 @@ function openPopup(item) {
     popupImageBg.style.backgroundImage = `url(${rarityBgURL})`;
 }
 
-// ... rest of your existing functions (applyFilters, updateStats, etc.) remain the same
-// Make sure to update the image URLs to use the protected endpoints
+// Fixed popup image error handler
+function handlePopupImageError(imgElement, fallbackUrl) {
+    const popupImageContent = document.getElementById("popupImageContent");
+    
+    // If already tried fallback, show not available
+    if (imgElement.dataset.fallbackTried === 'true') {
+        imgElement.style.display = 'none';
+        popupImageContent.innerHTML = '<div class="image-not-available"><i class="fas fa-image"></i><span>IMG<br>Not Available</span></div>';
+        return;
+    }
+    
+    // Mark as tried and attempt fallback
+    imgElement.dataset.fallbackTried = 'true';
+    imgElement.src = fallbackUrl;
+}
+
+function closePopup() {
+    const popupBg = document.getElementById("popupBg");
+    const dataUpdateNote = document.getElementById("dataUpdateNote");
+    
+    popupBg.style.display = "none";
+    document.body.style.overflow = "auto";
+    dataUpdateNote.style.display = 'none';
+}
+
+// ERROR HANDLING FUNCTION
+function showError(title, message, showRetry = false) {
+    const itemGrid = document.getElementById('itemGrid');
+    itemGrid.innerHTML = `
+        <div class="error-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>${title}</h3>
+            <p>${message}</p>
+            ${showRetry ? '<button class="retry-btn" onclick="fetchData()"><i class="fas fa-redo"></i> Try Again</button>' : ''}
+        </div>
+    `;
+}
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', initApp);
