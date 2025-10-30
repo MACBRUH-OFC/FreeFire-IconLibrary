@@ -43,9 +43,6 @@ const statusMessages = [
 function initApp() {
     console.log('Initializing Free Fire Item Library...');
     
-    // Set up assets through protected endpoints
-    setupAssets();
-    
     // Show loading screen with progress animation
     simulateLoadingProgress();
     
@@ -54,18 +51,6 @@ function initApp() {
     setupEventListeners();
     initializeCustomSelects();
     setupScrollBehavior();
-}
-
-// Set up dynamic assets through protected endpoints
-function setupAssets() {
-    // Set loading and header logos directly (no API needed for static assets)
-    const loadingLogo = document.getElementById('loadingLogo');
-    const headerLogo = document.getElementById('headerLogo');
-    
-    // Use direct URL for logos since they're not sensitive
-    const logoUrl = 'https://raw.githubusercontent.com/MACBRUH-OFC/FreeFire-Resources/main/Others/MacbruhLogo.png';
-    if (loadingLogo) loadingLogo.src = logoUrl;
-    if (headerLogo) headerLogo.src = logoUrl;
 }
 
 // Call this function after data loads to setup rarity backgrounds
@@ -594,8 +579,7 @@ function openPopup(item) {
     // Clear previous content
     popupImageContent.innerHTML = `
         <img src="${primaryURL}" 
-             onerror="handlePopupImageError(this, '${secondaryURL}')"
-             style="max-width: 100%; max-height: 100%; object-fit: contain;">
+             onerror="handlePopupImageError(this, '${secondaryURL}')">
     `;
 
     popupID.textContent = item.id || 'N/A';
