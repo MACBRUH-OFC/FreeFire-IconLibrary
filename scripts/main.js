@@ -39,30 +39,9 @@ const statusMessages = [
     "Library ready"
 ];
 
-// Test the API endpoints on load
-async function testEndpoints() {
-    try {
-        console.log('Testing API endpoints...');
-        
-        // Test data endpoint
-        const dataTest = await fetch(CONFIG.API_ENDPOINTS.DATA_SOURCE);
-        console.log('Data endpoint status:', dataTest.status);
-        
-        // Test image endpoint
-        const imageTest = await fetch(`${CONFIG.API_ENDPOINTS.IMAGE_PROXY}?type=rarity&value=Blue`);
-        console.log('Image endpoint status:', imageTest.status);
-        
-    } catch (error) {
-        console.error('API endpoint test failed:', error);
-    }
-}
-
 // Initialize the app
 function initApp() {
     console.log('Initializing Free Fire Item Library...');
-    
-    // Test endpoints first
-    testEndpoints();
     
     // Set up assets through protected endpoints
     setupAssets();
@@ -79,17 +58,17 @@ function initApp() {
 
 // Set up dynamic assets through protected endpoints
 function setupAssets() {
-    // Set loading and header logos through protected endpoint
+    // Set loading and header logos directly (no API needed for static assets)
     const loadingLogo = document.getElementById('loadingLogo');
     const headerLogo = document.getElementById('headerLogo');
     
-    // Use protected endpoint for logos
-    if (loadingLogo) loadingLogo.src = `${CONFIG.API_ENDPOINTS.IMAGE_PROXY}?type=icon&value=logo`;
-    if (headerLogo) headerLogo.src = `${CONFIG.API_ENDPOINTS.IMAGE_PROXY}?type=icon&value=logo`;
-    
-    setupRarityBackgrounds();
+    // Use direct URL for logos since they're not sensitive
+    const logoUrl = 'https://raw.githubusercontent.com/MACBRUH-OFC/FreeFire-Resources/main/Others/MacbruhLogo.png';
+    if (loadingLogo) loadingLogo.src = logoUrl;
+    if (headerLogo) headerLogo.src = logoUrl;
 }
 
+// Call this function after data loads to setup rarity backgrounds
 function setupRarityBackgrounds() {
     const rarities = ['Blue', 'Green', 'Orange', 'Orange_Plus', 'Purple', 'Purple_Plus', 'Red', 'White'];
     rarities.forEach(rarity => {
@@ -207,6 +186,12 @@ function fetchData() {
         allItems = response.data;
         filteredItems = [...allItems];
         updateStats();
+        
+        // SETUP RARITY BACKGROUNDS AFTER DATA LOADS
+        setTimeout(() => {
+            setupRarityBackgrounds();
+        }, 100);
+        
         applyFilters();
         hideLoadingScreen();
     })
@@ -424,7 +409,10 @@ function loadPage(page) {
 function createItemElement(item) {
     const itemGrid = document.getElementById('itemGrid');
     const div = document.createElement('div');
-    div.className = `item rarity-${item.rare}`;
+    
+    // FIX: Only add rarity class if item has rarity, otherwise use default styling
+    const rarityClass = item.rare ? `rarity-${item.rare}` : 'rarity-default';
+    div.className = `item ${rarityClass}`;
     
     let displayType = item.type;
     if (item.type === 'COLLECTION' && item.collection_type && item.collection_type !== 'NONE') {
