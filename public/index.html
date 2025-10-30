@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FREE FIRE ITEM LIBRARY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Page Transition Overlay -->
+    <div class="page-transition" id="pageTransition"></div>
+
+    <!-- Premium Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-logo-section">
+            <div class="logo-container">
+                <div class="logo-ring"></div>
+                <div class="logo">
+                    <img src="https://raw.githubusercontent.com/MACBRUH-OFC/FreeFire-Resources/main/Others/MacbruhLogo.png" alt="Macbruh Logo">
+                </div>
+            </div>
+            <div class="loading-title">FREE FIRE ITEM LIBRARY</div>
+            <div class="loading-subtitle">COMPLETE ICON DATABASE</div>
+        </div>
+        
+        <div class="progress-section">
+            <div class="progress-percent" id="loadingPercent">0%</div>
+            
+            <div class="progress-stages">
+                <div class="stage" id="stage1">
+                    <div class="stage-node">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="stage-label">Database</div>
+                </div>
+                <div class="stage" id="stage2">
+                    <div class="stage-node">
+                        <i class="fas fa-icons"></i>
+                    </div>
+                    <div class="stage-label">Icons</div>
+                </div>
+                <div class="stage" id="stage3">
+                    <div class="stage-node">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <div class="stage-label">Ready</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="loading-status">
+            <div class="status-text" id="statusText">Loading item database<span class="status-dots"></span></div>
+        </div>
+    </div>
+
+    <div class="app-container" id="appContainer">
+        <div class="header" id="mainHeader">
+            <div class="logo-container-small">
+                <div class="logo-small">
+                    <img src="https://raw.githubusercontent.com/MACBRUH-OFC/FreeFire-Resources/main/Others/MacbruhLogo.png" alt="Macbruh Logo">
+                </div>
+                <div class="title-container">
+                    <div class="app-title">FREE FIRE ITEM LIBRARY</div>
+                    <div class="app-subtitle">Complete Icon Database</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="search-section">
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search by name, icon, or item ID...">
+                    <div class="search-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filters-section">
+                <div class="filters-container">
+                    <div class="filters-left">
+                        <div class="filter-group">
+                            <span class="filter-label">Rarity</span>
+                            <div class="custom-select" id="raritySelect">
+                                <div class="select-selected">All Rarities</div>
+                                <div class="select-items">
+                                    <div>All Rarities</div>
+                                    <div>Orange</div>
+                                    <div>Orange Plus</div>
+                                    <div>Purple</div>
+                                    <div>Purple Plus</div>
+                                    <div>Red</div>
+                                    <div>Blue</div>
+                                    <div>Green</div>
+                                    <div>White</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <span class="filter-label">Sort by</span>
+                            <div class="custom-select" id="sortSelect">
+                                <div class="select-selected">ID</div>
+                                <div class="select-items">
+                                    <div>ID</div>
+                                    <div>Name</div>
+                                    <div>Rarity</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filters-right">
+                        <div class="filter-group">
+                            <span class="filter-label">Type</span>
+                            <div class="custom-select" id="typeSelect">
+                                <div class="select-selected">All Types</div>
+                                <div class="select-items">
+                                    <div>All Types</div>
+                                    <div>BUNDLE</div>
+                                    <div>TREASUREBOX</div>
+                                    <div>COLLECTION</div>
+                                    <div>CLOTHES</div>
+                                    <div>ROOMCARD</div>
+                                    <div>DEBRIS</div>
+                                    <div>TAILOR_EFFECT</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <span class="filter-label">Collection</span>
+                            <div class="custom-select" id="collectionTypeSelect">
+                                <div class="select-selected">All Collections</div>
+                                <div class="select-items">
+                                    <div>All Collections</div>
+                                    <div>EMOTE</div>
+                                    <div>HEADPIC</div>
+                                    <div>BANNER</div>
+                                    <div>LOOTBOX</div>
+                                    <div>GAMEBAG</div>
+                                    <div>PARACHUTE</div>
+                                    <div>SKATE</div>
+                                    <div>WEAPON_SKIN</div>
+                                    <div>VIHICLE_SKIN</div>
+                                    <div>GROUPANIM</div>
+                                    <div>MUSIC</div>
+                                    <div>TRANSFORM_EMOTE</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stats-item">
+                    <div class="stats-value" id="totalItems">0</div>
+                    <div class="stats-label">Total Items</div>
+                </div>
+                <div class="stats-item">
+                    <div class="stats-value" id="filteredItems">0</div>
+                    <div class="stats-label">Filtered Items</div>
+                </div>
+                <div class="stats-item">
+                    <div class="stats-value" id="currentPage">1</div>
+                    <div class="stats-label">Current Page</div>
+                </div>
+            </div>
+
+            <div class="grid-container" id="gridContainer">
+                <div class="grid" id="itemGrid"></div>
+                <div class="loading" id="loadingIndicator" style="display: none;">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Loading items...</div>
+                </div>
+            </div>
+
+            <div class="pagination-container">
+                <button class="pagination-btn" id="prevBtn">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Previous</span>
+                </button>
+                <div class="page-info">
+                    Page <span id="pageNumber">1</span> of <span id="totalPages">1</span>
+                </div>
+                <button class="pagination-btn" id="nextBtn">
+                    <span>Next</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Free Fire Item Library | Data provided by Macbruh FF API</p>
+            <div class="powered-by">Powered by Macbruh FF</div>
+        </div>
+    </div>
+
+    <!-- Popup Modal -->
+    <div class="popup-bg" id="popupBg">
+        <div class="popup" id="popup">
+            <div class="popup-content">
+                <div class="popup-header">
+                    <div>
+                        <div class="popup-title" id="popupName"></div>
+                        <div class="popup-subtitle" id="popupType"></div>
+                    </div>
+                    <button class="close-btn" id="closePopupBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="popup-image-container">
+                    <div class="popup-image-bg" id="popupImageBg"></div>
+                    <div id="popupImageContent"></div>
+                </div>
+                
+                <div class="popup-info">
+                    <div class="info-group">
+                        <div class="info-label">Item ID</div>
+                        <div class="info-value" id="popupID"></div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">Rarity</div>
+                        <div class="info-value" id="popupRarity"></div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">Icon ID</div>
+                        <div class="info-value" id="popupIconID"></div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">Category</div>
+                        <div class="info-value" id="popupCategory"></div>
+                    </div>
+                </div>
+                
+                <div class="popup-description">
+                    <div class="description-label">Description</div>
+                    <div class="description-text" id="popupDesc"></div>
+                    <div id="dataUpdateNote" class="data-update-note" style="display: none;">
+                        <i class="fas fa-info-circle"></i> Data Not Found
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
