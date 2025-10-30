@@ -1,0 +1,6 @@
+{
+  "name": "freefire-item-library",
+  "version": "1.0.0",
+  "description": "Free Fire Item Library with protected endpoints",
+  "type": "module"
+}
