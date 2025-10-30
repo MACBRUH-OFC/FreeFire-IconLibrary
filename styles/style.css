@@ -1214,4 +1214,12 @@ body {
     .loading-subtitle {
         font-size: 14px;
     }
+
+    .rarity-none .item-background {
+    background: none !important;
+    }
+
+    .rarity-NONE .item-background {
+    background: none !important;
+    }
 }
