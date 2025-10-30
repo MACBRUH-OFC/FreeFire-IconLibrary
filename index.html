@@ -20,7 +20,7 @@
             <div class="logo-container">
                 <div class="logo-ring"></div>
                 <div class="logo">
-                    <img src="" alt="Macbruh Logo" id="loadingLogo">
+                    <img src="https://raw.githubusercontent.com/MACBRUH-OFC/FreeFire-Resources/main/Others/MacbruhLogo.png" alt="Macbruh Logo" id="loadingLogo">
                 </div>
             </div>
             <div class="loading-title">FREE FIRE ITEM LIBRARY</div>
@@ -61,7 +61,7 @@
         <div class="header" id="mainHeader">
             <div class="logo-container-small">
                 <div class="logo-small">
-                    <img src="" alt="Macbruh Logo" id="headerLogo">
+                    <img src="https://raw.githubusercontent.com/MACBRUH-OFC/FreeFire-Resources/main/Others/MacbruhLogo.png" alt="Macbruh Logo" id="headerLogo">
                 </div>
                 <div class="title-container">
                     <div class="app-title">FREE FIRE ITEM LIBRARY</div>
@@ -193,7 +193,7 @@
         </div>
 
         <div class="footer">
-            <p>Free Fire Item Library | Data provided by Macbruh FF API</p>
+            <p>Free Fire Item Library | All Rights Reserved</p>
             <div class="powered-by">Powered by Macbruh FF</div>
         </div>
     </div>
@@ -247,31 +247,6 @@
         </div>
     </div>
 
-    <!-- Debug Info -->
-    <div id="debugInfo" style="display: none; position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 12px; z-index: 9999;">
-        <div>API Status: <span id="apiStatus">Testing...</span></div>
-    </div>
-
     <script src="scripts/main.js"></script>
-    
-    <script>
-    // Debug script to check API status
-    async function checkAPIStatus() {
-        try {
-            const response = await fetch('/api/get-data');
-            document.getElementById('apiStatus').textContent = response.ok ? '✅ Working' : '❌ Failed';
-            console.log('API Status Check:', response.status, response.ok);
-        } catch (error) {
-            document.getElementById('apiStatus').textContent = '❌ Error';
-            console.error('API Status Check Failed:', error);
-        }
-    }
-
-    // Show debug info in development
-    if (window.location.hostname === 'localhost' || window.location.hostname.includes('vercel')) {
-        document.getElementById('debugInfo').style.display = 'block';
-        checkAPIStatus();
-    }
-    </script>
 </body>
 </html>
