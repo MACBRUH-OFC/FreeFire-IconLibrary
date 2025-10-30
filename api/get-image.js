@@ -1,7 +1,20 @@
 export default async function handler(request, response) {
   // Set CORS headers
   response.setHeader('Access-Control-Allow-Origin', '*');
-  response.setHeader('Access-Control-Allow-Methods', 'GET');
+  response.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  // Handle OPTIONS request for CORS preflight
+  if (request.method === 'OPTIONS') {
+    response.status(200).end();
+    return;
+  }
+
+  // Only allow GET requests
+  if (request.method !== 'GET') {
+    response.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
 
   // HIDDEN IMAGE CONFIGURATION
   const CONFIG = {
@@ -19,15 +32,18 @@ export default async function handler(request, response) {
     }
   };
 
-  const { searchParams } = new URL(request.url, `http://${request.headers.host}`);
-  const type = searchParams.get('type') || '';
-  const value = searchParams.get('value') || '';
-
-  if (!type || !value) {
-    return response.status(400).json({ error: 'Missing type or value parameter' });
-  }
-
   try {
+    const { searchParams } = new URL(request.url, `http://${request.headers.host}`);
+    const type = searchParams.get('type') || '';
+    const value = searchParams.get('value') || '';
+
+    console.log('Image request:', { type, value });
+
+    if (!type || !value) {
+      response.status(400).json({ error: 'Missing type or value parameter' });
+      return;
+    }
+
     let imageUrl;
 
     // Route to appropriate image URL based on type
@@ -38,14 +54,17 @@ export default async function handler(request, response) {
     } else if (type === 'rarity') {
       imageUrl = CONFIG.RARITY_BACKGROUNDS[value] || CONFIG.RARITY_BACKGROUNDS['Blue'];
     } else {
-      return response.status(400).json({ error: 'Invalid type parameter' });
+      response.status(400).json({ error: 'Invalid type parameter' });
+      return;
     }
 
-    // Redirect to the actual image (hides the real URL from client)
+    console.log('Redirecting to:', imageUrl);
+    
+    // Redirect to the actual image
     response.redirect(302, imageUrl);
 
   } catch (error) {
-    console.error('Error in get-image:', error);
-    return response.status(500).json({ error: 'Internal server error' });
+    console.error('Image API Error:', error);
+    response.status(500).json({ error: 'Internal server error' });
   }
 }
