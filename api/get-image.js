@@ -29,15 +29,15 @@ export default async function handler(request, response) {
       'Purple_Plus': 'https://raw.githubusercontent.com/MACBRUH-OFC/FreeFire-Resources/refs/heads/main/Others/Prize-PurplePlus.png',
       'Red': 'https://raw.githubusercontent.com/MACBRUH-OFC/FreeFire-Resources/refs/heads/main/Others/Prize-Red.png',
       'White': 'https://raw.githubusercontent.com/MACBRUH-OFC/FreeFire-Resources/refs/heads/main/Others/Prize-White.png'
-    }
+    },
+    // ADD YOUR LOGO HERE
+    LOGO: 'https://raw.githubusercontent.com/MACBRUH-OFC/FreeFire-Resources/main/Others/MacbruhLogo.png'
   };
 
   try {
     const { searchParams } = new URL(request.url, `http://${request.headers.host}`);
     const type = searchParams.get('type') || '';
     const value = searchParams.get('value') || '';
-
-    console.log('Image request:', { type, value });
 
     if (!type || !value) {
       response.status(400).json({ error: 'Missing type or value parameter' });
@@ -53,12 +53,13 @@ export default async function handler(request, response) {
       imageUrl = `${CONFIG.IMAGE_BASE_ICON}${encodeURIComponent(value)}`;
     } else if (type === 'rarity') {
       imageUrl = CONFIG.RARITY_BACKGROUNDS[value] || CONFIG.RARITY_BACKGROUNDS['Blue'];
+    } else if (type === 'logo') {
+      // SPECIAL CASE FOR LOGO
+      imageUrl = CONFIG.LOGO;
     } else {
       response.status(400).json({ error: 'Invalid type parameter' });
       return;
     }
-
-    console.log('Redirecting to:', imageUrl);
     
     // Redirect to the actual image
     response.redirect(302, imageUrl);
