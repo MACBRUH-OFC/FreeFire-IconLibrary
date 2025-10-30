@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "freefire-item-library",
   "builds": [
     {
       "src": "api/**/*.php",
@@ -11,27 +10,26 @@
       "use": "@vercel/static"
     },
     {
-      "src": "**/*.css",
+      "src": "styles/**/*.css",
       "use": "@vercel/static"
     },
     {
-      "src": "**/*.js",
+      "src": "scripts/**/*.js", 
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/api/get-data",
+      "dest": "/api/get-data.php"
+    },
+    {
+      "src": "/api/get-image",
+      "dest": "/api/get-image.php"
     },
     {
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "functions": {
-    "api/get-data.php": {
-      "runtime": "@vercel/php@0.6.0"
-    }
-  }
+  ]
 }
