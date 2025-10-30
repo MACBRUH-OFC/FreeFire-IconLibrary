@@ -2,8 +2,8 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/**/*.php",
-      "use": "@vercel/php"
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
     },
     {
       "src": "**/*.html",
@@ -14,18 +14,18 @@
       "use": "@vercel/static"
     },
     {
-      "src": "scripts/**/*.js", 
+      "src": "scripts/**/*.js",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/api/get-data",
-      "dest": "/api/get-data.php"
+      "dest": "/api/get-data.js"
     },
     {
       "src": "/api/get-image",
-      "dest": "/api/get-image.php"
+      "dest": "/api/get-image.js"
     },
     {
       "src": "/(.*)",
