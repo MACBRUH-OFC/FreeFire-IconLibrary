@@ -1,41 +1,48 @@
 export default async function handler(request, response) {
   // Set CORS headers
   response.setHeader('Access-Control-Allow-Origin', '*');
-  response.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-  response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // Handle OPTIONS request for CORS
+  response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // Handle OPTIONS request for CORS preflight
   if (request.method === 'OPTIONS') {
-    return response.status(200).end();
+    response.status(200).end();
+    return;
   }
 
-  // HIDDEN CONFIGURATION - Users can't see these URLs
+  // Only allow GET requests
+  if (request.method !== 'GET') {
+    response.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  // HIDDEN CONFIGURATION
   const CONFIG = {
-    DATA_SOURCE: 'https://raw.githubusercontent.com/MACBRUH-OFC/FreeFire-Resources/main/data/itemData.json',
-    CACHE_TIME: 1800 * 1000, // 30 minutes in milliseconds
+    DATA_SOURCE: 'https://raw.githubusercontent.com/MACBRUH-OFC/FreeFire-Resources/main/data/itemData.json'
   };
 
   try {
-    // Fetch data from GitHub
+    console.log('Fetching data from:', CONFIG.DATA_SOURCE);
+    
     const fetchResponse = await fetch(CONFIG.DATA_SOURCE, {
       headers: {
         'User-Agent': 'FreeFire-Item-Library/1.0'
-      },
-      timeout: 30000
+      }
     });
 
     if (!fetchResponse.ok) {
-      throw new Error(`Source returned HTTP ${fetchResponse.status}`);
+      throw new Error(`HTTP ${fetchResponse.status}: ${fetchResponse.statusText}`);
     }
 
     const data = await fetchResponse.json();
 
     if (!Array.isArray(data)) {
-      throw new Error('Invalid data format received');
+      throw new Error('Invalid data format: Expected array');
     }
 
-    // Return successful response
-    return response.status(200).json({
+    console.log(`Successfully fetched ${data.length} items`);
+    
+    response.status(200).json({
       data: data,
       timestamp: Date.now(),
       count: data.length,
@@ -43,9 +50,9 @@ export default async function handler(request, response) {
     });
 
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error('API Error:', error);
     
-    return response.status(500).json({
+    response.status(500).json({
       error: error.message,
       timestamp: Date.now(),
       status: 'error'
