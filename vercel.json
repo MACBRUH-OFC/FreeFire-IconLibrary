@@ -6,26 +6,36 @@
       "use": "@vercel/node"
     },
     {
-      "src": "**/*.html",
+      "src": "*.html",
       "use": "@vercel/static"
     },
     {
-      "src": "styles/**/*.css",
+      "src": "styles/*.css",
       "use": "@vercel/static"
     },
     {
-      "src": "scripts/**/*.js",
+      "src": "scripts/*.js",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/api/get-data",
-      "dest": "/api/get-data.js"
+      "dest": "/api/get-data.js",
+      "methods": ["GET", "POST", "OPTIONS"]
     },
     {
       "src": "/api/get-image",
-      "dest": "/api/get-image.js"
+      "dest": "/api/get-image.js", 
+      "methods": ["GET", "OPTIONS"]
+    },
+    {
+      "src": "/styles/(.*)",
+      "dest": "/styles/$1"
+    },
+    {
+      "src": "/scripts/(.*)",
+      "dest": "/scripts/$1"
     },
     {
       "src": "/(.*)",
