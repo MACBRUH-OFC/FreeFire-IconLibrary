@@ -386,6 +386,11 @@ function loadPage(page) {
         createItemElement(item);
     });
 
+    // SETUP RARITY BACKGROUNDS FOR NEWLY CREATED ITEMS
+    setTimeout(() => {
+        setupRarityBackgrounds();
+    }, 50);
+
     updatePagination();
     updateCurrentPageDisplay();
 }
@@ -395,8 +400,10 @@ function createItemElement(item) {
     const itemGrid = document.getElementById('itemGrid');
     const div = document.createElement('div');
     
-    // FIX: Only add rarity class if item has rarity, otherwise use default styling
-    const rarityClass = item.rare ? `rarity-${item.rare}` : 'rarity-default';
+    // FIX: Only add rarity class if item has valid rarity, otherwise use default styling
+    const validRarities = ['Blue', 'Green', 'Orange', 'Orange_Plus', 'Purple', 'Purple_Plus', 'Red', 'White'];
+    const hasValidRarity = item.rare && validRarities.includes(item.rare);
+    const rarityClass = hasValidRarity ? `rarity-${item.rare}` : 'rarity-none';
     div.className = `item ${rarityClass}`;
     
     let displayType = item.type;
@@ -574,7 +581,11 @@ function openPopup(item) {
     // Use protected image endpoints
     const primaryURL = `${CONFIG.API_ENDPOINTS.IMAGE_PROXY}?type=item&value=${item.id}`;
     const secondaryURL = `${CONFIG.API_ENDPOINTS.IMAGE_PROXY}?type=icon&value=${item.icon}`;
-    const rarityBgURL = `${CONFIG.API_ENDPOINTS.IMAGE_PROXY}?type=rarity&value=${item.rare || 'Blue'}`;
+    
+    // Only set rarity background if item has valid rarity
+    const validRarities = ['Blue', 'Green', 'Orange', 'Orange_Plus', 'Purple', 'Purple_Plus', 'Red', 'White'];
+    const hasValidRarity = item.rare && validRarities.includes(item.rare);
+    const rarityBgURL = hasValidRarity ? `${CONFIG.API_ENDPOINTS.IMAGE_PROXY}?type=rarity&value=${item.rare}` : '';
 
     // Clear previous content
     popupImageContent.innerHTML = `
@@ -608,8 +619,13 @@ function openPopup(item) {
     }
     popupCategory.textContent = category || 'General';
 
-    // Use protected endpoint for rarity background
-    popupImageBg.style.backgroundImage = `url(${rarityBgURL})`;
+    // Use protected endpoint for rarity background only if valid rarity
+    if (hasValidRarity) {
+        popupImageBg.style.backgroundImage = `url(${rarityBgURL})`;
+    } else {
+        popupImageBg.style.backgroundImage = 'none';
+        popupImageBg.style.backgroundColor = 'var(--surface-light)';
+    }
 }
 
 // Fixed popup image error handler
