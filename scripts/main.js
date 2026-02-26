@@ -1,3 +1,18 @@
+// Normalize item format (supports old + new API structure)
+function normalizeItem(item) {
+  return {
+    ...item,
+
+    // new structure support
+    name: item.name || item.name_text || "",
+    description: item.description || item.description_text || "",
+
+    // keep everything safe
+    id: item.id ?? "",
+    icon: item.icon ?? "",
+    type: item.type ?? "UNKNOWN"
+  };
+}
 // Configuration - Only public endpoints visible
 const CONFIG = {
     API_ENDPOINTS: {
