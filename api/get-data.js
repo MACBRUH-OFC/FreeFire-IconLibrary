@@ -1,3 +1,18 @@
+// Normalize item format (supports old + new API structure)
+function normalizeItem(item) {
+  return {
+    ...item,
+
+    name: item.name || item.name_text || "",
+    description: item.description || item.description_text || "",
+
+    id: item.id ?? "",
+    icon: item.icon ?? "",
+    type: item.type ?? "UNKNOWN",
+    rare: item.rare ?? "NONE",
+    collection_type: item.collection_type ?? "NONE"
+  };
+}
 export default async function handler(request, response) {
   // Set CORS headers
   response.setHeader('Access-Control-Allow-Origin', '*');
