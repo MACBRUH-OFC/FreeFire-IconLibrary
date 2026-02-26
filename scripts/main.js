@@ -1,18 +1,3 @@
-// Normalize item format (supports old + new API structure)
-function normalizeItem(item) {
-  return {
-    ...item,
-
-    // new structure support
-    name: item.name || item.name_text || "",
-    description: item.description || item.description_text || "",
-
-    // keep everything safe
-    id: item.id ?? "",
-    icon: item.icon ?? "",
-    type: item.type ?? "UNKNOWN"
-  };
-}
 // Configuration - Only public endpoints visible
 const CONFIG = {
     API_ENDPOINTS: {
@@ -182,10 +167,10 @@ function fetchData() {
         }
         
         console.log(`Successfully loaded ${response.data.length} items`);
-
-allItems = response.data.map(normalizeItem);   // ← ONLY CHANGE
-filteredItems = [...allItems];
-updateStats();
+        
+        allItems = response.data;
+        filteredItems = [...allItems];
+        updateStats();
         
         // SETUP RARITY BACKGROUNDS AFTER DATA LOADS
         setTimeout(() => {
