@@ -182,10 +182,10 @@ function fetchData() {
         }
         
         console.log(`Successfully loaded ${response.data.length} items`);
-        
-        allItems = response.data;
-        filteredItems = [...allItems];
-        updateStats();
+
+allItems = response.data.map(normalizeItem);   // ← ONLY CHANGE
+filteredItems = [...allItems];
+updateStats();
         
         // SETUP RARITY BACKGROUNDS AFTER DATA LOADS
         setTimeout(() => {
